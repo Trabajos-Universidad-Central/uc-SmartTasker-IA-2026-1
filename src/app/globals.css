@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 18%;
+    --card: 228 60% 98%;
+    --card-foreground: 220 13% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+    --primary: 255 100% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 220 13% 18%;
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 13% 45%;
+    --accent: 230 90% 57%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 88%;
+    --input: 0 0% 100%;
+    --ring: 255 100% 66%;
+    --chart-1: 255 100% 66%;
+    --chart-2: 230 90% 57%;
+    --chart-3: 140 70% 60%;
+    --chart-4: 0 80% 75%;
+    --chart-5: 200 90% 70%;
+    --radius: 1.5rem;
+
+    /* SoftFlow UI Pastel card colors */
+    --card-blue: 210 100% 97%;
+    --card-blue-foreground: 210 50% 40%;
+    --card-pink: 340 100% 97%;
+    --card-pink-foreground: 340 50% 45%;
+    --card-green: 140 100% 97%;
+    --card-green-foreground: 140 40% 40%;
+    --card-yellow: 45 100% 97%;
+    --card-yellow-foreground: 45 50% 40%;
+  }
+
+  .dark {
+    --background: 220 13% 10%;
+    --foreground: 0 0% 98%;
+    --card: 220 13% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 220 13% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 255 100% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 13% 20%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 230 90% 57%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 25%;
+    --input: 220 13% 20%;
+    --ring: 255 100% 66%;
+    
+    --card-blue: 210 20% 15%;
+    --card-blue-foreground: 210 100% 80%;
+    --card-pink: 340 20% 15%;
+    --card-pink-foreground: 340 100% 80%;
+    --card-green: 140 20% 15%;
+    --card-green-foreground: 140 100% 80%;
+    --card-yellow: 45 20% 15%;
+    --card-yellow-foreground: 45 100% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
