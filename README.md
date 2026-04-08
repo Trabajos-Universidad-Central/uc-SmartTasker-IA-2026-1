@@ -91,3 +91,4 @@ La aplicación estará disponible en `http://localhost:9002`.
 - `npm run lint`: Ejecuta el linter para revisar el código.
 
 ## Contribuciones
+
