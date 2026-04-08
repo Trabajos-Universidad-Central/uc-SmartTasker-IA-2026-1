@@ -1,8 +1,15 @@
-# SmartTasker: Tu Asistente Académico Inteligente
+# SmartTasker: Tu asistente inteligente para gestionar el tiempo
 
-SmartTasker es una aplicación web moderna diseñada para ayudar a los estudiantes a organizar su vida académica de manera eficiente. Con un panel de control dinámico, gestión de eventos y tareas, y recomendaciones de estudio personalizadas mediante inteligencia artificial, SmartTasker se convierte en el compañero perfecto para el éxito académico.
+SmartTasker es una aplicación web moderna diseñada para ayudar a usuarios de todo tipo a organizar mejor su tiempo y administrar eventos, tareas y recordatorios de forma más eficiente. Ofrece un dashboard y panel de control dinámico para visaulizar rapidamente tus eventos más importantes, gestión de eventos intuitiva y capacidades de IA multimodal para extraer texto de imágenes, reduciendo la necesidad de ingresar información manualmente.
 
-![SmartTasker Screenshot](https://i.imgur.com/your-screenshot.png) <!-- Reemplaza con una captura de pantalla de tu app -->
+## Características Principales
+
+- **Panel de Control Dinámico**: Visualiza el estado actual, tareas pendientes y eventos futuros de un vistazo.
+- **Gestión de Eventos y Tareas**: Crea, edita, elimina y organiza eventos, tareas y recordatorios en un calendario y una lista de tareas dedicada.
+- **Extracción de Texto de Imágenes con IA**: Procesa imágenes para generar automáticamente datos estructurados, facilitando la creación de eventos y tareas sin entrada manual.
+- **Filtrado y Búsqueda**: Encuentra tareas rápidamente con filtros por prioridad y búsqueda por texto.
+- **Interfaz Moderna y Responsiva**: Un diseño limpio, construido con las últimas tecnologías, que se adapta a cualquier dispositivo.
+
 
 ## Características Principales
 
@@ -50,7 +57,6 @@ Para ejecutar este proyecto en tu entorno local, sigue estos pasos:
 ### 1. Clonar el Repositorio
 
 ```bash
-# (Si estás trabajando fuera de Firebase Studio)
 git clone https://github.com/your-username/smart-tasker.git
 cd smart-tasker
 ```
@@ -89,8 +95,3 @@ La aplicación estará disponible en `http://localhost:9002`.
 - `npm run build`: Compila la aplicación para producción.
 - `npm run start`: Inicia el servidor de producción después de compilar.
 - `npm run lint`: Ejecuta el linter para revisar el código.
-
-## Contribuciones
-
-
-
