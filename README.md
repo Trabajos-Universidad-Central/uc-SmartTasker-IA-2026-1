@@ -21,14 +21,15 @@ El proyecto está construido sobre una arquitectura moderna basada en componente
 - **Frontend**: Construido con **Next.js** y el **App Router**, lo que permite renderizado en el servidor (SSR) y una excelente optimización.
 - **Lenguaje**: **TypeScript** para un código más robusto y mantenible.
 - **UI y Estilos**:
-    - **Tailwind CSS** para un sistema de diseño basado en utilidades.
-    - **ShadCN/UI** como librería de componentes, que proporciona elementos de UI accesibles y personalizables.
-    - **Lucide React** para los iconos.
+  - **Tailwind CSS** para un sistema de diseño basado en utilidades.
+  - **ShadCN/UI** como librería de componentes, que proporciona elementos de UI accesibles y personalizables.
+  - **Lucide React** para los iconos.
 - **Gestión de Estado**: Se utiliza la **API de Contexto de React** (`useContext`) para gestionar el estado global de los eventos y tareas de forma sencilla y eficiente.
 - **Formularios**: **React Hook Form** para la gestión de formularios y **Zod** para la validación de esquemas.
 - **Inteligencia Artificial**: **Genkit** con el plugin de **Google AI (Gemini)** para potenciar las funcionalidades de IA.
 
 La estructura de carpetas sigue las convenciones de Next.js:
+
 - `src/app/`: Contiene las rutas de la aplicación (Dashboard, Calendario, Tareas, Configuración).
 - `src/components/`: Componentes reutilizables, organizados por funcionalidad (dashboard, layout, ui).
 - `src/context/`: Contiene los proveedores de contexto para el estado global.
@@ -88,3 +89,5 @@ La aplicación estará disponible en `http://localhost:9002`.
 - `npm run build`: Compila la aplicación para producción.
 - `npm run start`: Inicia el servidor de producción después de compilar.
 - `npm run lint`: Ejecuta el linter para revisar el código.
+
+## Contribuciones
