@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { useEvents, type EventFormValues } from '@/context/events-context';
+import { useEvents, type EventFormValues, type EventWithId } from '@/context/events-context';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
@@ -52,7 +52,7 @@ const priorityMap = {
   low: { label: 'Baja', variant: 'secondary' as const },
 };
 
-type Task = EventFormValues & { type: 'tarea' };
+type Task = EventWithId & { type: 'tarea' };
 
 export function PendingTasks() {
   const { events, updateEvent, deleteEvent } = useEvents();
