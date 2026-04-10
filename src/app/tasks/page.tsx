@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useEvents, type EventFormValues } from '@/context/events-context';
+import { useEvents, type EventFormValues, type EventWithId } from '@/context/events-context';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eventFormSchema } from '@/lib/types';
@@ -97,7 +97,7 @@ const statusMap: Record<
   },
 };
 
-type Task = EventFormValues & { type: 'tarea' };
+type Task = EventWithId & { type: 'tarea' };
 
 export default function TasksPage() {
   const { events, addEvent, updateEvent, deleteEvent } = useEvents();

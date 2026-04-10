@@ -24,7 +24,7 @@ import {
   Pencil,
   Trash,
 } from 'lucide-react';
-import { useEvents, type EventFormValues } from '@/context/events-context';
+import { useEvents, type EventWithId, type EventFormValues } from '@/context/events-context';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,10 +78,10 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { events, deleteEvent, updateEvent } = useEvents();
 
-  const [viewingEvent, setViewingEvent] = useState<EventFormValues | null>(
+  const [viewingEvent, setViewingEvent] = useState<EventWithId | null>(
     null
   );
-  const [editingEvent, setEditingEvent] = useState<EventFormValues | null>(
+  const [editingEvent, setEditingEvent] = useState<EventWithId | null>(
     null
   );
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -125,11 +125,11 @@ export default function CalendarPage() {
 
   const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-  const getEventsForDay = (day: Date): EventFormValues[] => {
+  const getEventsForDay = (day: Date): EventWithId[] => {
     return events.filter((event) => isSameDay(event.date, day));
   };
 
-  const handleEventClick = (event: EventFormValues) => {
+  const handleEventClick = (event: EventWithId) => {
     setViewingEvent(event);
   };
 

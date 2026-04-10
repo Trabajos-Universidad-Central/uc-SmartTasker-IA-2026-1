@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useEvents, type EventFormValues } from '@/context/events-context';
+import { useEvents, type EventFormValues, type EventWithId } from '@/context/events-context';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -68,7 +68,7 @@ const priorityMap = {
 
 export function CreatedEvents() {
   const { events, deleteEvent, updateEvent } = useEvents();
-  const [editingEvent, setEditingEvent] = useState<EventFormValues | null>(
+  const [editingEvent, setEditingEvent] = useState<EventWithId | null>(
     null
   );
   const { toast } = useToast();

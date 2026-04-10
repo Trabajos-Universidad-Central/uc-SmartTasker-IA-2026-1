@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, type ReactNode } from 'react';
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { useEvents, type EventFormValues } from '@/context/events-context';
+import { useEvents, type EventFormValues, type EventWithId } from '@/context/events-context';
 import {
   Calendar as CalendarIcon,
   Bell,
@@ -54,7 +54,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const typeMap: Record<
   'evento' | 'recordatorio' | 'tarea',
-  { icon: JSX.Element; label: string; color: string; iconColor: string }
+  { icon: ReactNode; label: string; color: string; iconColor: string }
 > = {
   evento: {
     icon: <CalendarIcon className="w-5 h-5" />,
@@ -78,10 +78,10 @@ const typeMap: Record<
 
 export function UpcomingEvents() {
   const { events, updateEvent, deleteEvent } = useEvents();
-  const [viewingEvent, setViewingEvent] = useState<EventFormValues | null>(
+  const [viewingEvent, setViewingEvent] = useState<EventWithId | null>(
     null
   );
-  const [editingEvent, setEditingEvent] = useState<EventFormValues | null>(
+  const [editingEvent, setEditingEvent] = useState<EventWithId | null>(
     null
   );
   const { toast } = useToast();
