@@ -7,6 +7,8 @@
  * - GenerateStudyRecommendationsOutput - The return type for the generateStudyRecommendations function.
  */
 
+// TODO: Uncomment when implementing study recommendations
+/*
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
@@ -69,3 +71,4 @@ const generateStudyRecommendationsFlow = ai.defineFlow(
     return output!;
   }
 );
+*/
