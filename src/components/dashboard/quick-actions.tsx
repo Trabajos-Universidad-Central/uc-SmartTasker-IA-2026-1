@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ import { useState } from 'react';
 import { es } from 'date-fns/locale';
 import { eventFormSchema, type EventFormValues } from '@/lib/types';
 import { useEvents } from '@/context/events-context';
+import { TIME_OPTIONS } from '@/lib/utils';
 
 export function QuickActions() {
   const { toast } = useToast();
@@ -48,11 +50,26 @@ export function QuickActions() {
     defaultValues: {
       title: '',
       type: 'evento',
+      fullDay: true,
+      horaInicio: '',
+      horaFin: '',
     },
   });
 
+  const fullDay = form.watch('fullDay');
+
   function onSubmit(data: EventFormValues) {
-    addEvent(data);
+    const eventData = {
+      ...data,
+      ...(data.fullDay
+        ? { horaInicio: undefined, horaFin: undefined }
+        : {
+            horaInicio: data.horaInicio || undefined,
+            horaFin: data.horaFin || undefined,
+          }),
+    };
+
+    addEvent(eventData);
     toast({
       title: '¡Elemento Creado!',
       description: `Se ha creado "${data.title}" para el ${format(
@@ -61,7 +78,7 @@ export function QuickActions() {
         { locale: es }
       )}.`,
     });
-    form.reset();
+    form.reset({ title: '', type: 'evento', fullDay: true, horaInicio: '', horaFin: '' });
     setOpen(false);
   }
 
@@ -89,13 +106,13 @@ export function QuickActions() {
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título</FormLabel>
+                <div className="space-y-1">
+                  <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Examen de cálculo" {...field} />
+                    <Input placeholder="Ej: Examen de cálculo" className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
+                </div>
               )}
             />
 
@@ -104,14 +121,14 @@ export function QuickActions() {
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo</FormLabel>
+                  <div className="space-y-1">
+                    <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Tipo</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
                           <SelectValue placeholder="Selecciona un tipo" />
                         </SelectTrigger>
                       </FormControl>
@@ -122,7 +139,7 @@ export function QuickActions() {
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
 
@@ -130,8 +147,8 @@ export function QuickActions() {
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col justify-end">
-                    <FormLabel>Fecha</FormLabel>
+                  <div className="space-y-1 flex flex-col justify-end">
+                    <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Fecha</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
@@ -146,27 +163,108 @@ export function QuickActions() {
                         ref={field.ref}
                         name={field.name}
                         onBlur={field.onBlur}
+                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50"
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
             </div>
+
+            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-slate-900">Todo el día</p>
+                <p className="text-sm text-slate-500">
+                  Marca esta opción si el evento no necesita hora.
+                </p>
+              </div>
+              <Switch
+                checked={fullDay}
+                onCheckedChange={(checked) => {
+                  form.setValue('fullDay', checked)
+                  if (checked) {
+                    form.setValue('horaInicio', '')
+                    form.setValue('horaFin', '')
+                  }
+                }}
+              />
+            </div>
+
+            {!fullDay && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="horaInicio"
+                  render={({ field }) => (
+                    <div className="space-y-1">
+                      <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Hora inicio</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
+                              <SelectValue placeholder="Selecciona inicio" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {time}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </div>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="horaFin"
+                  render={({ field }) => (
+                    <div className="space-y-1">
+                      <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Hora fin</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
+                              <SelectValue placeholder="Selecciona fin" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {time}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </div>
+                  )}
+                />
+              </div>
+            )}
 
             {form.watch('type') === 'tarea' && (
               <FormField
                 control={form.control}
                 name="priority"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prioridad</FormLabel>
+                  <div className="space-y-1">
+                    <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Prioridad</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
                           <SelectValue placeholder="Selecciona una prioridad" />
                         </SelectTrigger>
                       </FormControl>
@@ -192,7 +290,7 @@ export function QuickActions() {
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
             )}
@@ -201,17 +299,17 @@ export function QuickActions() {
               control={form.control}
               name="description"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (Opcional)</FormLabel>
+                <div className="space-y-1">
+                  <FormLabel className="mb-1 block text-sm font-medium text-slate-700">Descripción (Opcional)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Añade más detalles..."
-                      className="resize-none"
+                      className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50 resize-none"
                       {...field}
                     />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
+                </div>
               )}
             />
             <DialogFooter>

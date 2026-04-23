@@ -1,24 +1,34 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import type { EventFormValues as UnidentifiedEventFormValues } from '@/lib/types';
+import type { EventFormValues } from '@/lib/types';
 
-export type EventFormValues = UnidentifiedEventFormValues & { id: string };
+export type { EventFormValues } from '@/lib/types';
 
-interface EventsContextType {
-  events: EventFormValues[];
-  addEvent: (event: UnidentifiedEventFormValues) => void;
-  deleteEvent: (id: string) => void;
-  updateEvent: (id: string, eventData: UnidentifiedEventFormValues) => void;
-}
+export type EventWithId = EventFormValues & { id: string };
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined);
 
-export function EventsProvider({ children }: { children: ReactNode }) {
-  const [events, setEvents] = useState<EventFormValues[]>([]);
+interface EventsContextType {
+  events: EventWithId[];
+  addEvent: (event: EventFormValues) => void;
+  deleteEvent: (id: string) => void;
+  updateEvent: (id: string, eventData: EventFormValues) => void;
+}
 
-  const addEvent = (event: UnidentifiedEventFormValues) => {
-    const newEvent: EventFormValues = { ...event, id: crypto.randomUUID() };
+export function useEvents() {
+  const context = useContext(EventsContext);
+  if (!context) {
+    throw new Error('useEvents must be used within EventsProvider');
+  }
+  return context;
+}
+
+export function EventsProvider({ children }: { children: ReactNode }) {
+  const [events, setEvents] = useState<EventWithId[]>([]);
+
+  const addEvent = (event: EventFormValues) => {
+    const newEvent: EventWithId = { ...event, id: crypto.randomUUID() };
     if (newEvent.type === 'tarea' && !newEvent.status) {
       newEvent.status = 'not-started';
     }
@@ -31,7 +41,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
 
   const updateEvent = (
     id: string,
-    eventData: UnidentifiedEventFormValues
+    eventData: EventFormValues
   ) => {
     setEvents((prev) =>
       prev.map((event) =>
@@ -47,12 +57,4 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       {children}
     </EventsContext.Provider>
   );
-}
-
-export function useEvents() {
-  const context = useContext(EventsContext);
-  if (context === undefined) {
-    throw new Error('useEvents must be used within an EventsProvider');
-  }
-  return context;
 }

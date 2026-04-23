@@ -1,21 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { useEvents, type EventFormValues } from '@/context/events-context';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { eventFormSchema } from '@/lib/types';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { useState, useEffect, useMemo } from "react";
+import {
+  useEvents,
+  type EventFormValues,
+  type EventWithId,
+} from "@/context/events-context";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { eventFormSchema } from "@/lib/types";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -23,7 +27,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +36,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -40,18 +44,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import {
   PlusCircle,
   Search,
@@ -60,8 +65,10 @@ import {
   ListFilter,
   MoreHorizontal,
   Eye,
+  Clock,
   Calendar as CalendarIcon,
-} from 'lucide-react';
+} from "lucide-react";
+import { TIME_OPTIONS, formatTimeRange } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -70,59 +77,59 @@ import {
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
   DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const priorityMap = {
-  high: { label: 'Alta', variant: 'destructive' as const },
-  medium: { label: 'Media', variant: 'accent' as const },
-  low: { label: 'Baja', variant: 'secondary' as const },
+  high: { label: "Alta", variant: "destructive" as const },
+  medium: { label: "Media", variant: "accent" as const },
+  low: { label: "Baja", variant: "secondary" as const },
 };
 
 const statusMap: Record<
-  'not-started' | 'in-progress' | 'completed',
+  "not-started" | "in-progress" | "completed",
   { label: string; className: string }
 > = {
-  'not-started': {
-    label: 'Sin empezar',
-    className: 'bg-muted/80 text-muted-foreground border-transparent',
+  "not-started": {
+    label: "Sin empezar",
+    className: "bg-muted/80 text-muted-foreground border-transparent",
   },
-  'in-progress': {
-    label: 'En proceso',
-    className: 'bg-card-yellow text-card-yellow-foreground border-transparent',
+  "in-progress": {
+    label: "En proceso",
+    className: "bg-card-yellow text-card-yellow-foreground border-transparent",
   },
   completed: {
-    label: 'Completado',
-    className: 'bg-card-green text-card-green-foreground border-transparent',
+    label: "Completado",
+    className: "bg-card-green text-card-green-foreground border-transparent",
   },
 };
 
-type Task = EventFormValues & { type: 'tarea' };
+type Task = EventWithId & { type: "tarea" };
 
 export default function TasksPage() {
   const { events, addEvent, updateEvent, deleteEvent } = useEvents();
   const { toast } = useToast();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
 
   const tasks = useMemo(
-    () => events.filter((event): event is Task => event.type === 'tarea'),
-    [events]
+    () => events.filter((event): event is Task => event.type === "tarea"),
+    [events],
   );
 
   const filteredTasks = useMemo(() => {
     return tasks
       .filter((task) =>
-        task.title.toLowerCase().includes(searchTerm.toLowerCase())
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()),
       )
       .filter(
         (task) =>
           priorityFilter.length === 0 ||
-          (task.priority && priorityFilter.includes(task.priority))
+          (task.priority && priorityFilter.includes(task.priority)),
       )
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [tasks, searchTerm, priorityFilter]);
@@ -130,16 +137,23 @@ export default function TasksPage() {
   const addForm = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
-      title: '',
-      type: 'tarea',
-      priority: 'medium',
-      status: 'not-started',
+      title: "",
+      type: "tarea",
+      priority: "medium",
+      status: "not-started",
+      fullDay: true,
+      horaInicio: "",
+      horaFin: "",
     },
   });
+
+  const addFullDay = addForm.watch("fullDay");
 
   const editForm = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
   });
+
+  const editFullDay = editForm.watch("fullDay") ?? true;
 
   useEffect(() => {
     if (editingTask) {
@@ -148,25 +162,50 @@ export default function TasksPage() {
   }, [editingTask, editForm]);
 
   const handleAddTask = (data: EventFormValues) => {
-    addEvent({ ...data, type: 'tarea' });
+    const newTaskData = {
+      ...data,
+      type: "tarea" as const,
+      ...(data.fullDay
+        ? { horaInicio: undefined, horaFin: undefined }
+        : {
+            horaInicio: data.horaInicio || undefined,
+            horaFin: data.horaFin || undefined,
+          }),
+    };
+
+    addEvent(newTaskData);
     toast({
-      title: '¡Tarea Creada!',
+      title: "¡Tarea Creada!",
       description: `Se ha creado la tarea "${data.title}".`,
     });
     addForm.reset({
-      title: '',
-      type: 'tarea',
-      priority: 'medium',
-      status: 'not-started',
+      title: "",
+      type: "tarea",
+      priority: "medium",
+      status: "not-started",
+      fullDay: true,
+      horaInicio: "",
+      horaFin: "",
     });
     setIsAddDialogOpen(false);
   };
 
   const handleUpdateTask = (data: EventFormValues) => {
     if (editingTask) {
-      updateEvent(editingTask.id, { ...data, type: 'tarea' });
+      const updatedData = {
+        ...data,
+        type: "tarea" as const,
+        ...(data.fullDay
+          ? { horaInicio: undefined, horaFin: undefined }
+          : {
+              horaInicio: data.horaInicio || undefined,
+              horaFin: data.horaFin || undefined,
+            }),
+      };
+
+      updateEvent(editingTask.id, updatedData);
       toast({
-        title: '¡Tarea Actualizada!',
+        title: "¡Tarea Actualizada!",
         description: `Se ha actualizado la tarea "${data.title}".`,
       });
       setEditingTask(null);
@@ -176,22 +215,22 @@ export default function TasksPage() {
   const handleDeleteTask = (taskId: string, taskTitle: string) => {
     deleteEvent(taskId);
     toast({
-      title: '¡Tarea Eliminada!',
+      title: "¡Tarea Eliminada!",
       description: `Se ha eliminado la tarea "${taskTitle}".`,
     });
   };
 
   const handleStatusChange = (
     task: Task,
-    status: 'not-started' | 'in-progress' | 'completed'
+    status: "not-started" | "in-progress" | "completed",
   ) => {
     updateEvent(task.id, { ...task, status });
     toast({
-      title: '¡Estado Actualizado!',
+      title: "¡Estado Actualizado!",
       description: `El estado de la tarea "${task.title}" ha sido actualizado.`,
     });
   };
-  
+
   const handleDeleteFromView = () => {
     if (viewingTask) {
       handleDeleteTask(viewingTask.id, viewingTask.title);
@@ -205,7 +244,6 @@ export default function TasksPage() {
       setViewingTask(null);
     }
   };
-
 
   return (
     <>
@@ -242,16 +280,19 @@ export default function TasksPage() {
                     control={addForm.control}
                     name="title"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título de la tarea</FormLabel>
+                      <div className="space-y-1">
+                        <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                          Título de la tarea
+                        </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Ej: Preparar presentación"
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50"
                             {...field}
                           />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                      </div>
                     )}
                   />
 
@@ -260,14 +301,16 @@ export default function TasksPage() {
                       control={addForm.control}
                       name="priority"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prioridad</FormLabel>
+                        <div className="space-y-1">
+                          <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                            Prioridad
+                          </FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
                                 <SelectValue placeholder="Selecciona una prioridad" />
                               </SelectTrigger>
                             </FormControl>
@@ -293,21 +336,23 @@ export default function TasksPage() {
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
+                        </div>
                       )}
                     />
                     <FormField
                       control={addForm.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Estado</FormLabel>
+                        <div className="space-y-1">
+                          <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                            Estado
+                          </FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
                                 <SelectValue placeholder="Selecciona un estado" />
                               </SelectTrigger>
                             </FormControl>
@@ -333,7 +378,7 @@ export default function TasksPage() {
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
+                        </div>
                       )}
                     />
                   </div>
@@ -342,47 +387,138 @@ export default function TasksPage() {
                     control={addForm.control}
                     name="date"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha de Vencimiento</FormLabel>
+                      <div className="space-y-1">
+                        <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                          Fecha de Vencimiento
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="date"
                             value={
                               field.value instanceof Date
-                                ? format(field.value, 'yyyy-MM-dd')
-                                : ''
+                                ? format(field.value, "yyyy-MM-dd")
+                                : ""
                             }
                             onChange={(e) => {
                               if (e.target.value) {
                                 field.onChange(
-                                  new Date(e.target.value + 'T00:00:00')
+                                  new Date(e.target.value + "T00:00:00"),
                                 );
                               } else {
                                 field.onChange(null);
                               }
                             }}
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50"
                           />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                      </div>
                     )}
                   />
+
+                  <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        Todo el día
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Marca esta opción si la tarea no necesita hora.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={addFullDay}
+                      onCheckedChange={(checked) => {
+                        addForm.setValue("fullDay", checked);
+                        if (checked) {
+                          addForm.setValue("horaInicio", "");
+                          addForm.setValue("horaFin", "");
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {!addFullDay && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={addForm.control}
+                        name="horaInicio"
+                        render={({ field }) => (
+                          <div className="space-y-1">
+                            <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                              Hora inicio
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
+                                    <SelectValue placeholder="Selecciona inicio" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {TIME_OPTIONS.map((time) => (
+                                    <SelectItem key={time} value={time}>
+                                      {time}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                          </div>
+                        )}
+                      />
+                      <FormField
+                        control={addForm.control}
+                        name="horaFin"
+                        render={({ field }) => (
+                          <div className="space-y-1">
+                            <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                              Hora fin
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
+                                    <SelectValue placeholder="Selecciona fin" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {TIME_OPTIONS.map((time) => (
+                                    <SelectItem key={time} value={time}>
+                                      {time}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                          </div>
+                        )}
+                      />
+                    </div>
+                  )}
 
                   <FormField
                     control={addForm.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descripción (Opcional)</FormLabel>
+                      <div className="space-y-1">
+                        <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                          Descripción (Opcional)
+                        </FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Añade más detalles..."
-                            className="resize-none"
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50 resize-none"
                             {...field}
                           />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                      </div>
                     )}
                   />
                   <DialogFooter>
@@ -437,7 +573,7 @@ export default function TasksPage() {
                         setPriorityFilter((prev) =>
                           checked
                             ? [...prev, key]
-                            : prev.filter((p) => p !== key)
+                            : prev.filter((p) => p !== key),
                         );
                       }}
                     >
@@ -476,8 +612,8 @@ export default function TasksPage() {
                                 {task.status && statusMap[task.status] ? (
                                   <Badge
                                     className={cn(
-                                      'w-full justify-center text-xs',
-                                      statusMap[task.status].className
+                                      "w-full justify-center text-xs",
+                                      statusMap[task.status].className,
                                     )}
                                   >
                                     {statusMap[task.status].label}
@@ -499,13 +635,16 @@ export default function TasksPage() {
                                     onClick={() =>
                                       handleStatusChange(
                                         task,
-                                        statusKey as 'not-started' | 'in-progress' | 'completed'
+                                        statusKey as
+                                          | "not-started"
+                                          | "in-progress"
+                                          | "completed",
                                       )
                                     }
                                   >
                                     {statusValue.label}
                                   </DropdownMenuItem>
-                                )
+                                ),
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -518,7 +657,23 @@ export default function TasksPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {format(task.date, 'dd MMM, yyyy', { locale: es })}
+                          <div className="space-y-1">
+                            <span>
+                              {format(task.date, "dd MMM, yyyy", {
+                                locale: es,
+                              })}
+                            </span>
+                            {task.fullDay ? (
+                              <Badge variant="secondary" className="text-xs">
+                                Todo el día
+                              </Badge>
+                            ) : task.horaInicio || task.horaFin ? (
+                              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5" />
+                                {formatTimeRange(task)}
+                              </div>
+                            ) : null}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -581,16 +736,19 @@ export default function TasksPage() {
                 control={editForm.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Título de la tarea</FormLabel>
+                  <div className="space-y-1">
+                    <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                      Título de la tarea
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ej: Preparar presentación"
+                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50"
                         {...field}
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
 
@@ -599,14 +757,16 @@ export default function TasksPage() {
                   control={editForm.control}
                   name="priority"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prioridad</FormLabel>
+                    <div className="space-y-1">
+                      <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                        Prioridad
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
                             <SelectValue placeholder="Selecciona una prioridad" />
                           </SelectTrigger>
                         </FormControl>
@@ -632,21 +792,23 @@ export default function TasksPage() {
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
+                    </div>
                   )}
                 />
                 <FormField
                   control={editForm.control}
                   name="status"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
+                    <div className="space-y-1">
+                      <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                        Estado
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
                             <SelectValue placeholder="Selecciona un estado" />
                           </SelectTrigger>
                         </FormControl>
@@ -672,7 +834,7 @@ export default function TasksPage() {
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
+                    </div>
                   )}
                 />
               </div>
@@ -681,48 +843,139 @@ export default function TasksPage() {
                 control={editForm.control}
                 name="date"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de Vencimiento</FormLabel>
+                  <div className="space-y-1">
+                    <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                      Fecha de Vencimiento
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="date"
                         value={
                           field.value instanceof Date
-                            ? format(field.value, 'yyyy-MM-dd')
-                            : ''
+                            ? format(field.value, "yyyy-MM-dd")
+                            : ""
                         }
                         onChange={(e) => {
                           if (e.target.value) {
                             field.onChange(
-                              new Date(e.target.value + 'T00:00:00')
+                              new Date(e.target.value + "T00:00:00"),
                             );
                           } else {
                             field.onChange(null);
                           }
                         }}
+                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50"
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
+
+              <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">
+                    Todo el día
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Marca esta opción si la tarea no necesita hora.
+                  </p>
+                </div>
+                <Switch
+                  checked={editFullDay}
+                  onCheckedChange={(checked) => {
+                    editForm.setValue("fullDay", checked);
+                    if (checked) {
+                      editForm.setValue("horaInicio", "");
+                      editForm.setValue("horaFin", "");
+                    }
+                  }}
+                />
+              </div>
+
+              {!editFullDay && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="horaInicio"
+                    render={({ field }) => (
+                      <div className="space-y-1">
+                        <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                          Hora inicio
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
+                                <SelectValue placeholder="Selecciona inicio" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {TIME_OPTIONS.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </div>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="horaFin"
+                    render={({ field }) => (
+                      <div className="space-y-1">
+                        <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                          Hora fin
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50">
+                                <SelectValue placeholder="Selecciona fin" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {TIME_OPTIONS.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </div>
+                    )}
+                  />
+                </div>
+              )}
 
               <FormField
                 control={editForm.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción (Opcional)</FormLabel>
+                  <div className="space-y-1">
+                    <FormLabel className="mb-1 block text-sm font-medium text-slate-700">
+                      Descripción (Opcional)
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Añade más detalles..."
-                        className="resize-none"
+                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500 bg-slate-50 resize-none"
                         {...field}
-                        value={field.value || ''}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
               <DialogFooter>
@@ -739,7 +992,7 @@ export default function TasksPage() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       <Dialog
         open={!!viewingTask}
         onOpenChange={(isOpen) => !isOpen && setViewingTask(null)}
@@ -753,15 +1006,19 @@ export default function TasksPage() {
             <div className="space-y-4 py-4">
               <div className="text-sm text-muted-foreground flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4" />
-                <span>{format(viewingTask.date, 'PPP', { locale: es })}</span>
+                <span>{format(viewingTask.date, "PPP", { locale: es })}</span>
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{formatTimeRange(viewingTask) ?? "Sin horario"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Estado:</span>
                 {viewingTask.status && statusMap[viewingTask.status] ? (
                   <Badge
                     className={cn(
-                      'text-xs',
-                      statusMap[viewingTask.status].className
+                      "text-xs",
+                      statusMap[viewingTask.status].className,
                     )}
                   >
                     {statusMap[viewingTask.status].label}

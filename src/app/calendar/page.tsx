@@ -24,7 +24,7 @@ import {
   Pencil,
   Trash,
 } from 'lucide-react';
-import { useEvents, type EventFormValues } from '@/context/events-context';
+import { useEvents, type EventWithId, type EventFormValues } from '@/context/events-context';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -58,6 +58,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
+import { TIME_OPTIONS, formatTimeRange } from '@/lib/utils';
 
 const typeMap = {
   evento: { label: 'Evento', icon: <CalendarIcon className="w-4 h-4" /> },
@@ -78,10 +80,10 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { events, deleteEvent, updateEvent } = useEvents();
 
-  const [viewingEvent, setViewingEvent] = useState<EventFormValues | null>(
+  const [viewingEvent, setViewingEvent] = useState<EventWithId | null>(
     null
   );
-  const [editingEvent, setEditingEvent] = useState<EventFormValues | null>(
+  const [editingEvent, setEditingEvent] = useState<EventWithId | null>(
     null
   );
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -125,11 +127,11 @@ export default function CalendarPage() {
 
   const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-  const getEventsForDay = (day: Date): EventFormValues[] => {
+  const getEventsForDay = (day: Date): EventWithId[] => {
     return events.filter((event) => isSameDay(event.date, day));
   };
 
-  const handleEventClick = (event: EventFormValues) => {
+  const handleEventClick = (event: EventWithId) => {
     setViewingEvent(event);
   };
 
@@ -308,6 +310,9 @@ export default function CalendarPage() {
                 <CalendarIcon className="w-4 h-4" />
                 <span>{format(viewingEvent.date, 'PPP', { locale: es })}</span>
               </div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <span>{formatTimeRange(viewingEvent) ?? 'Sin horario'}</span>
+              </div>
               {viewingEvent.type === 'tarea' && viewingEvent.priority && (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
@@ -432,6 +437,80 @@ export default function CalendarPage() {
                   )}
                 />
               </div>
+
+              <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Todo el día</p>
+                  <p className="text-sm text-slate-500">
+                    Marca esta opción si el evento no necesita hora.
+                  </p>
+                </div>
+                <Switch
+                  checked={form.watch('fullDay') ?? false}
+                  onCheckedChange={(checked) =>
+                    form.setValue('fullDay', checked)
+                  }
+                />
+              </div>
+
+              {!form.watch('fullDay') && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="horaInicio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora inicio</FormLabel>
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 bg-slate-50 focus:border-violet-500 focus:ring-violet-500">
+                              <SelectValue placeholder="Selecciona hora" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="horaFin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora fin</FormLabel>
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 bg-slate-50 focus:border-violet-500 focus:ring-violet-500">
+                              <SelectValue placeholder="Selecciona hora" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               {form.watch('type') === 'tarea' && (
                 <FormField
