@@ -56,8 +56,16 @@ function Calendar({
           date.toLocaleDateString('es-ES', { weekday: 'narrow' }),
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" {...props} />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" {...props} />,
+        PreviousMonthButton: ({ ...props }) => (
+          <button {...props} className="flex items-center justify-center">
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        ),
+        NextMonthButton: ({ ...props }) => (
+          <button {...props} className="flex items-center justify-center">
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        ),
       }}
       {...props}
     />

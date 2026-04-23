@@ -16,6 +16,8 @@ import {
   Bell,
   Pencil,
   Trash,
+  Eye,
+  Clock,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,6 +52,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { TIME_OPTIONS, formatTimeRange } from '@/lib/utils';
 
 const typeMap = {
   evento: { label: 'Evento', icon: <Calendar className="w-4 h-4" /> },
@@ -69,6 +73,9 @@ const priorityMap = {
 export function CreatedEvents() {
   const { events, deleteEvent, updateEvent } = useEvents();
   const [editingEvent, setEditingEvent] = useState<EventWithId | null>(
+    null
+  );
+  const [viewingEvent, setViewingEvent] = useState<EventWithId | null>(
     null
   );
   const { toast } = useToast();
@@ -134,12 +141,24 @@ export function CreatedEvents() {
                     <Calendar className="w-3 h-3" />
                     <span>{format(event.date, 'PPP', { locale: es })}</span>
                   </div>
+                  <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                    <span>{formatTimeRange(event) ?? 'Sin horario'}</span>
+                  </div>
                   {event.description && (
                     <p className="text-sm text-muted-foreground mt-2 bg-muted/50 p-2 rounded-md">
                       {event.description}
                     </p>
                   )}
                   <div className="flex items-center gap-2 mt-4 justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={() => setViewingEvent(event)}
+                    >
+                      <Eye className="w-3.5 h-3.5 mr-1.5" />
+                      Ver
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -165,6 +184,77 @@ export function CreatedEvents() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={!!viewingEvent}
+        onOpenChange={(isOpen) => !isOpen && setViewingEvent(null)}
+      >
+        {viewingEvent && (
+          <DialogContent>
+            <DialogHeader>
+              <div className="flex items-start gap-3">
+                <div className="text-primary flex-shrink-0 mt-1">
+                  {typeMap[viewingEvent.type].icon}
+                </div>
+                <div className="flex-1">
+                  <DialogTitle>{viewingEvent.title}</DialogTitle>
+                  <DialogDescription>
+                    {typeMap[viewingEvent.type].label}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  {format(viewingEvent.date, 'PPP', { locale: es })}
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{formatTimeRange(viewingEvent) ?? 'Sin horario'}</span>
+              </div>
+              {viewingEvent.type === 'tarea' && viewingEvent.priority && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Prioridad:
+                  </span>
+                  <Badge variant={priorityMap[viewingEvent.priority].variant}>
+                    {priorityMap[viewingEvent.priority].label}
+                  </Badge>
+                </div>
+              )}
+              {viewingEvent.description && (
+                <p className="text-sm text-muted-foreground mt-2 bg-muted/50 p-3 rounded-md">
+                  {viewingEvent.description}
+                </p>
+              )}
+            </div>
+            <DialogFooter className="sm:justify-between">
+              <Button variant="destructive" onClick={() => {
+                deleteEvent(viewingEvent.id);
+                setViewingEvent(null);
+              }}>
+                <Trash className="w-4 h-4 mr-2" />
+                Eliminar
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={() => setViewingEvent(null)}>
+                  Cerrar
+                </Button>
+                <Button onClick={() => {
+                  setEditingEvent(viewingEvent);
+                  setViewingEvent(null);
+                }}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Editar
+                </Button>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
 
       <Dialog
         open={!!editingEvent}
@@ -255,6 +345,80 @@ export function CreatedEvents() {
                   )}
                 />
               </div>
+
+              <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Todo el día</p>
+                  <p className="text-sm text-slate-500">
+                    Marca esta opción si el evento no necesita hora.
+                  </p>
+                </div>
+                <Switch
+                  checked={form.watch('fullDay') ?? false}
+                  onCheckedChange={(checked) =>
+                    form.setValue('fullDay', checked)
+                  }
+                />
+              </div>
+
+              {!form.watch('fullDay') && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="horaInicio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora inicio</FormLabel>
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 bg-slate-50 focus:border-violet-500 focus:ring-violet-500">
+                              <SelectValue placeholder="Selecciona hora" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="horaFin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora fin</FormLabel>
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 bg-slate-50 focus:border-violet-500 focus:ring-violet-500">
+                              <SelectValue placeholder="Selecciona hora" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               {form.watch('type') === 'tarea' && (
                 <FormField

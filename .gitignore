@@ -46,3 +46,6 @@ firestore-debug.log
 
 #backup js server 
 server.js.backup
+
+#linter 
+.eslintrc.json

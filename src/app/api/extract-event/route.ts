@@ -27,11 +27,16 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
+    let resultado;
+    let lastError;
 
-    const fechaActual = new Date().toLocaleDateString('es-CO');
+    for (const modelName of modelsToTry) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const fechaActual = new Date().toLocaleDateString('es-CO');
 
-    const prompt = `
+        const prompt = `
       Hoy es ${fechaActual}.
       Analiza esta imagen y extrae la información relevante del evento.
 
@@ -51,11 +56,35 @@ export async function POST(request: NextRequest) {
       Si algún dato definitivamente no está en la imagen, pon null.
     `;
 
-    const resultado = await model.generateContent([prompt, imagenParaIA]);
+        resultado = await model.generateContent([prompt, imagenParaIA]);
+        console.log(`Modelo usado: ${modelName}`);
+        break; // Success, sale del loop
+      } catch (error: any) {
+        lastError = error;
+        if (error.message?.includes('503') || error.status === 503) {
+          console.log(`Modelo ${modelName} no disponible (503), intentando con el siguiente...`);
+          continue; // Intenta con el siguiente modelo 
+        } else {
+          // Otro tipo de error, no reintenta y lo muestra directamente
+          throw error;
+        }
+      }
+    }
+
+    if (!resultado) {
+      throw lastError; // Todos los modelos fallaron con 503 o hubo otro error, muestra el último error
+    }
+
+    // Mensajes para saber cuántos tokens costó esa imagen y ese texto
+    if (resultado.response.usageMetadata) {
+      console.log("=== ESTADÍSTICAS DE CONSUMO ===");
+      console.log("Tokens de la imagen:", resultado.response.usageMetadata.promptTokenCount);
+      console.log("Tokens de la respuesta:", resultado.response.usageMetadata.candidatesTokenCount);
+      console.log("Total tokens usados:", resultado.response.usageMetadata.totalTokenCount);
+    }
+
     const textoRespuesta = resultado.response.text();
-
     const jsonLimpio = textoRespuesta.replace(/```json/g, '').replace(/```/g, '').trim();
-
     const datosEvento = JSON.parse(jsonLimpio);
 
     return NextResponse.json(datosEvento);
