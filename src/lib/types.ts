@@ -11,6 +11,9 @@ export const eventFormSchema = z.object({
   }),
   priority: z.enum(['low', 'medium', 'high']).optional(),
   status: z.enum(['not-started', 'in-progress', 'completed']).optional(),
+  fullDay: z.boolean().optional(),
+  horaInicio: z.string().optional(),
+  horaFin: z.string().optional(),
   description: z.string().optional(),
 });
 
