@@ -16,6 +16,7 @@ import {
   Eye,
   Pencil,
   Trash,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isFuture, isToday, isTomorrow } from 'date-fns';
@@ -51,6 +52,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { TIME_OPTIONS, formatTimeRange } from '@/lib/utils';
 
 const typeMap: Record<
   'evento' | 'recordatorio' | 'tarea',
@@ -238,6 +241,10 @@ export function UpcomingEvents() {
                   {format(viewingEvent.date, 'PPP', { locale: es })}
                 </span>
               </div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{formatTimeRange(viewingEvent) ?? 'Sin horario'}</span>
+              </div>
               {viewingEvent.description && (
                 <p className="text-sm text-muted-foreground mt-2 bg-muted/50 p-3 rounded-md">
                   {viewingEvent.description}
@@ -351,6 +358,80 @@ export function UpcomingEvents() {
                   )}
                 />
               </div>
+
+              <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Todo el día</p>
+                  <p className="text-sm text-slate-500">
+                    Marca esta opción si el evento no necesita hora.
+                  </p>
+                </div>
+                <Switch
+                  checked={form.watch('fullDay') ?? false}
+                  onCheckedChange={(checked) =>
+                    form.setValue('fullDay', checked)
+                  }
+                />
+              </div>
+
+              {!form.watch('fullDay') && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="horaInicio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora inicio</FormLabel>
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 bg-slate-50 focus:border-violet-500 focus:ring-violet-500">
+                              <SelectValue placeholder="Selecciona hora" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="horaFin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora fin</FormLabel>
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-slate-300 bg-slate-50 focus:border-violet-500 focus:ring-violet-500">
+                              <SelectValue placeholder="Selecciona hora" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TIME_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               <FormField
                 control={form.control}
