@@ -29,7 +29,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { eventFormSchema } from '@/lib/types';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -44,6 +43,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { categories as allCategories } from '@/lib/data';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 const priorityMap = {
@@ -108,6 +109,40 @@ export function PendingTasks() {
     [events]
   );
 
+  // Filters state
+  const [searchTitle, setSearchTitle] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [dateFrom, setDateFrom] = useState<string | null>(null);
+  const [dateTo, setDateTo] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  const filteredTasks = useMemo(() => {
+    return pendingTasks.filter((task) => {
+      // title search
+      if (searchTitle && !task.title.toLowerCase().includes(searchTitle.toLowerCase())) return false;
+      // keyword in description
+      if (keyword) {
+        const desc = (task.description || '').toLowerCase();
+        if (!desc.includes(keyword.toLowerCase())) return false;
+      }
+      // date range
+      const taskDate = task.date instanceof Date ? task.date : new Date(task.date);
+      if (dateFrom) {
+        const from = new Date(dateFrom + 'T00:00:00');
+        if (taskDate < from) return false;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo + 'T23:59:59');
+        if (taskDate > to) return false;
+      }
+      // category (optional)
+      if (categoryFilter) {
+        if ((task as any).category !== categoryFilter) return false;
+      }
+      return true;
+    });
+  }, [pendingTasks, searchTitle, keyword, dateFrom, dateTo, categoryFilter]);
+
   const handleTaskCompletion = (task: Task, completed: boolean) => {
     updateEvent(task.id, {
       ...task,
@@ -126,50 +161,126 @@ export function PendingTasks() {
         </CardHeader>
         <CardContent>
           {pendingTasks.length > 0 ? (
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-4">
-                {pendingTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center p-3 rounded-lg border transition-colors hover:bg-muted/50"
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                <div>
+                  <Label htmlFor="searchTitle">Buscar título</Label>
+                  <Input
+                    id="searchTitle"
+                    value={searchTitle}
+                    onChange={(e) => setSearchTitle(e.target.value)}
+                    placeholder="Buscar por título"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="keyword">Palabra clave</Label>
+                  <Input
+                    id="keyword"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="Buscar en descripción"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dateFrom">Desde</Label>
+                  <Input
+                    id="dateFrom"
+                    type="date"
+                    value={dateFrom ?? ''}
+                    onChange={(e) => setDateFrom(e.target.value || null)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dateTo">Hasta</Label>
+                  <Input
+                    id="dateTo"
+                    type="date"
+                    value={dateTo ?? ''}
+                    onChange={(e) => setDateTo(e.target.value || null)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="category">Categoría (opcional)</Label>
+                  <Select
+                    value={categoryFilter ?? 'all'}
+                    onValueChange={(value) => setCategoryFilter(value === 'all' ? null : value)}
                   >
-                    <Checkbox
-                      id={`task-${task.id}`}
-                      className="mr-4"
-                      checked={task.status === 'completed'}
-                      onCheckedChange={(checked) => {
-                        handleTaskCompletion(task, !!checked);
-                      }}
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={`task-${task.id}`}
-                        className="font-medium cursor-pointer"
-                      >
-                        {task.title}
-                      </label>
-                      <p className="text-sm text-muted-foreground">
-                        Vence: {format(task.date, 'PPP', { locale: es })}
-                      </p>
-                    </div>
-                    {task.priority && (
-                      <Badge variant={priorityMap[task.priority].variant}>
-                        {priorityMap[task.priority].label}
-                      </Badge>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 ml-2"
-                      onClick={() => setViewingTask(task)}
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span className="sr-only">Ver detalles</span>
-                    </Button>
-                  </div>
-                ))}
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {allCategories.map((c) => (
+                        <SelectItem key={c.id} value={c.name}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSearchTitle('');
+                      setKeyword('');
+                      setDateFrom(null);
+                      setDateTo(null);
+                      setCategoryFilter(null);
+                    }}
+                  >
+                    Limpiar
+                  </Button>
+                </div>
               </div>
-            </ScrollArea>
+
+              <ScrollArea className="h-[300px] pr-4">
+                <div className="space-y-4">
+                  {filteredTasks.map((task) => {
+                    return (
+                      <div
+                        key={task.id}
+                        className="flex items-center p-3 rounded-lg border transition-colors hover:bg-muted/50"
+                      >
+                        <Checkbox
+                          id={`task-${task.id}`}
+                          className="mr-4"
+                          checked={task.status === 'completed'}
+                          onCheckedChange={(checked) => {
+                            handleTaskCompletion(task, !!checked);
+                          }}
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor={`task-${task.id}`}
+                            className="font-medium cursor-pointer"
+                          >
+                            {task.title}
+                          </label>
+                          <p className="text-sm text-muted-foreground">
+                            Vence: {format(task.date, 'PPP', { locale: es })}
+                          </p>
+                        </div>
+                        {task.priority && (
+                          <Badge variant={priorityMap[task.priority].variant}>
+                            {priorityMap[task.priority].label}
+                          </Badge>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 ml-2"
+                          onClick={() => setViewingTask(task)}
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span className="sr-only">Ver detalles</span>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
           ) : (
             <div className="h-[300px] flex items-center justify-center">
               <p className="text-sm text-muted-foreground text-center">
