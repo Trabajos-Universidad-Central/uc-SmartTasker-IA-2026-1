@@ -57,6 +57,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { categories as allCategories } from "@/lib/data";
 import {
   PlusCircle,
   Search,
@@ -112,6 +113,10 @@ export default function TasksPage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
+  const [keyword, setKeyword] = useState("");
+  const [dateFrom, setDateFrom] = useState<string | null>(null);
+  const [dateTo, setDateTo] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
@@ -124,15 +129,39 @@ export default function TasksPage() {
   const filteredTasks = useMemo(() => {
     return tasks
       .filter((task) =>
+        // title search
         task.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+      .filter((task) =>
+        // keyword in description (optional)
+        !keyword || (task.description || "").toLowerCase().includes(keyword.toLowerCase()),
+      )
+      .filter((task) =>
+        // category (optional)
+        !categoryFilter || (task as any).category === categoryFilter,
       )
       .filter(
         (task) =>
+          // priority filter (optional)
           priorityFilter.length === 0 ||
           (task.priority && priorityFilter.includes(task.priority)),
       )
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [tasks, searchTerm, priorityFilter]);
+      .filter((task) => {
+        // date range (optional) based on task.date
+        const taskDate = task.date instanceof Date ? task.date : new Date(task.date);
+        if (dateFrom) {
+          const from = new Date(dateFrom + "T00:00:00");
+          if (taskDate < from) return false;
+        }
+        if (dateTo) {
+          const to = new Date(dateTo + "T23:59:59");
+          if (taskDate > to) return false;
+        }
+        return true;
+      })
+      // order by date descending (más recientes primero)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [tasks, searchTerm, keyword, dateFrom, dateTo, categoryFilter, priorityFilter]);
 
   const addForm = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -582,6 +611,58 @@ export default function TasksPage() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+
+            {/* Filtros extendidos: palabra clave, rango de fechas y categoría */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+              <Input
+                placeholder="Palabra clave (descripción)"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+              <Input
+                type="date"
+                placeholder="Desde"
+                value={dateFrom ?? ""}
+                onChange={(e) => setDateFrom(e.target.value || null)}
+              />
+              <Input
+                type="date"
+                placeholder="Hasta"
+                value={dateTo ?? ""}
+                onChange={(e) => setDateTo(e.target.value || null)}
+              />
+              <div className="flex items-center gap-2">
+                <Select
+                  value={categoryFilter ?? "all"}
+                  onValueChange={(value) => setCategoryFilter(value === "all" ? null : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Categoría (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {allCategories.map((c) => (
+                      <SelectItem key={c.id} value={c.name}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setKeyword("");
+                    setDateFrom(null);
+                    setDateTo(null);
+                    setCategoryFilter(null);
+                    setPriorityFilter([]);
+                  }}
+                >
+                  Limpiar
+                </Button>
+              </div>
             </div>
 
             <div className="rounded-md border">

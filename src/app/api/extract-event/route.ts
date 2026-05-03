@@ -2,15 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai'; // Asegúrase de instalar esta biblioteca y configurarla correctamente
 
 const apiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error('GEMINI_API_KEY is not set');
+let genAI: any = null;
+if (apiKey) {
+  try {
+    genAI = new GoogleGenerativeAI(apiKey);
+  } catch (err) {
+    console.error('Failed to initialize GoogleGenerativeAI:', err);
+    genAI = null;
+  }
+} else {
+  console.warn('GEMINI_API_KEY not set — AI extract endpoint will return 500 until configured.');
 }
-
-const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function POST(request: NextRequest) {
   try {
+    if (!genAI) {
+      console.error('GEMINI_API_KEY not configured or AI client init failed');
+      return NextResponse.json({ error: 'AI not configured on server' }, { status: 500 });
+    }
     const formData = await request.formData();
     const file = formData.get('imagen') as File;
 

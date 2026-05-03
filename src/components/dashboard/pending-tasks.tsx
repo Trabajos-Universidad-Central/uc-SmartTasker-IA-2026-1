@@ -29,7 +29,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { eventFormSchema } from '@/lib/types';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -44,6 +43,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+// Label component removed — not needed after removing filters
 import { useToast } from '@/hooks/use-toast';
 
 const priorityMap = {
@@ -108,6 +108,9 @@ export function PendingTasks() {
     [events]
   );
 
+  // Without filters: show all pending tasks
+  const tasksToShow = pendingTasks;
+
   const handleTaskCompletion = (task: Task, completed: boolean) => {
     updateEvent(task.id, {
       ...task,
@@ -126,50 +129,54 @@ export function PendingTasks() {
         </CardHeader>
         <CardContent>
           {pendingTasks.length > 0 ? (
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-4">
-                {pendingTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center p-3 rounded-lg border transition-colors hover:bg-muted/50"
-                  >
-                    <Checkbox
-                      id={`task-${task.id}`}
-                      className="mr-4"
-                      checked={task.status === 'completed'}
-                      onCheckedChange={(checked) => {
-                        handleTaskCompletion(task, !!checked);
-                      }}
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={`task-${task.id}`}
-                        className="font-medium cursor-pointer"
+            <div>
+              <ScrollArea className="h-[300px] pr-4">
+                <div className="space-y-4">
+                  {tasksToShow.map((task) => {
+                    return (
+                      <div
+                        key={task.id}
+                        className="flex items-center p-3 rounded-lg border transition-colors hover:bg-muted/50"
                       >
-                        {task.title}
-                      </label>
-                      <p className="text-sm text-muted-foreground">
-                        Vence: {format(task.date, 'PPP', { locale: es })}
-                      </p>
-                    </div>
-                    {task.priority && (
-                      <Badge variant={priorityMap[task.priority].variant}>
-                        {priorityMap[task.priority].label}
-                      </Badge>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 ml-2"
-                      onClick={() => setViewingTask(task)}
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span className="sr-only">Ver detalles</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
+                        <Checkbox
+                          id={`task-${task.id}`}
+                          className="mr-4"
+                          checked={task.status === 'completed'}
+                          onCheckedChange={(checked) => {
+                            handleTaskCompletion(task, !!checked);
+                          }}
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor={`task-${task.id}`}
+                            className="font-medium cursor-pointer"
+                          >
+                            {task.title}
+                          </label>
+                          <p className="text-sm text-muted-foreground">
+                            Vence: {format(task.date, 'PPP', { locale: es })}
+                          </p>
+                        </div>
+                        {task.priority && (
+                          <Badge variant={priorityMap[task.priority].variant}>
+                            {priorityMap[task.priority].label}
+                          </Badge>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 ml-2"
+                          onClick={() => setViewingTask(task)}
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span className="sr-only">Ver detalles</span>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
           ) : (
             <div className="h-[300px] flex items-center justify-center">
               <p className="text-sm text-muted-foreground text-center">
