@@ -3,6 +3,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -41,6 +44,11 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const memberSince = user?.created_at
+    ? format(new Date(user.created_at), "d 'de' MMMM, yyyy", { locale: es })
+    : '';
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -83,11 +91,11 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" value="estudiante@example.com" readOnly />
+            <Input id="email" value={user?.email ?? ''} readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="memberSince">Miembro desde</Label>
-            <Input id="memberSince" value="14 de Mayo, 2024" readOnly />
+            <Input id="memberSince" value={memberSince} readOnly />
           </div>
         </CardContent>
       </Card>
