@@ -15,6 +15,7 @@ import {
 import data from '@/lib/placeholder-images.json';
 import { useAuth } from '@/hooks/use-auth';
 import { createClient } from '@/lib/supabase/client';
+import { MobileSidebarTrigger } from '@/components/layout/sidebar';
 
 export function AppHeader() {
   const userAvatar = data.placeholderImages.find((p) => p.id === 'user-avatar');
@@ -33,8 +34,9 @@ export function AppHeader() {
   };
 
   return (
-    <header className="p-4 sm:px-6 lg:px-8 border-b flex items-center justify-end">
-      <div className="flex items-center gap-4">
+    <header className="p-4 sm:px-6 lg:px-8 border-b flex items-center">
+      <MobileSidebarTrigger />
+      <div className="ml-auto flex items-center gap-4">
         <div className="relative">
           <Button variant="ghost" size="icon">
             <Bell className="h-6 w-6" />
