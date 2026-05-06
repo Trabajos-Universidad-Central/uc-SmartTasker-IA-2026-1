@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AppShell } from '@/components/layout/app-shell';
 import { EventsProvider } from '@/context/events-context';
+import { TasksProvider } from '@/context/tasks-context';
 
 export const metadata: Metadata = {
   title: 'SmartTasker',
@@ -26,7 +27,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <EventsProvider>
-          <AppShell>{children}</AppShell>
+          <TasksProvider>
+            <AppShell>{children}</AppShell>
+          </TasksProvider>
         </EventsProvider>
         <Toaster />
       </body>
