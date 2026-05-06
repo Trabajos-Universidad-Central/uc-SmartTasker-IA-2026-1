@@ -1,16 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai'; // Asegúrase de instalar esta biblioteca y configurarla correctamente
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createServerClient } from '@supabase/ssr';
 
 const apiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error('GEMINI_API_KEY is not set');
+let genAI: any = null;
+if (apiKey) {
+  try {
+    genAI = new GoogleGenerativeAI(apiKey);
+  } catch (err) {
+    console.error('Failed to initialize GoogleGenerativeAI:', err);
+    genAI = null;
+  }
+} else {
+  console.warn('GEMINI_API_KEY not set — AI extract endpoint will return 500 until configured.');
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+async function getServerClient(request: NextRequest) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+          });
+        },
+      },
+    }
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar autenticación
+    const supabase = await getServerClient(request);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!genAI) {
+      console.error('GEMINI_API_KEY not configured or AI client init failed');
+      return NextResponse.json({ error: 'AI not configured on server' }, { status: 500 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('imagen') as File;
 
@@ -63,7 +101,7 @@ export async function POST(request: NextRequest) {
         lastError = error;
         if (error.message?.includes('503') || error.status === 503) {
           console.log(`Modelo ${modelName} no disponible (503), intentando con el siguiente...`);
-          continue; // Intenta con el siguiente modelo 
+          continue; // Intenta con el siguiente modelo
         } else {
           // Otro tipo de error, no reintenta y lo muestra directamente
           throw error;
@@ -87,7 +125,13 @@ export async function POST(request: NextRequest) {
     const jsonLimpio = textoRespuesta.replace(/```json/g, '').replace(/```/g, '').trim();
     const datosEvento = JSON.parse(jsonLimpio);
 
-    return NextResponse.json(datosEvento);
+    return NextResponse.json({
+      titulo: datosEvento.titulo,
+      fecha: datosEvento.fecha,
+      hora: datosEvento.hora,
+      descripcion: datosEvento.descripcion,
+      source: 'ai_image',
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Hubo un error procesando la imagen.' }, { status: 500 });

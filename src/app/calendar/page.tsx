@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   addMonths,
   eachDayOfInterval,
@@ -56,6 +57,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
@@ -76,9 +78,24 @@ const priorityMap = {
   low: { label: 'Baja', variant: 'secondary' as const },
 };
 
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 export default function CalendarPage() {
+  const searchParams = useSearchParams();
   const [currentDate, setCurrentDate] = useState(new Date());
   const { events, deleteEvent, updateEvent } = useEvents();
+  const [searchTitle, setSearchTitle] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [keyword, setKeyword] = useState('');
+  const [dateFrom, setDateFrom] = useState<string | null>(null);
+  const [dateTo, setDateTo] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
   const [viewingEvent, setViewingEvent] = useState<EventWithId | null>(
     null
@@ -99,6 +116,22 @@ export default function CalendarPage() {
     }
   }, [editingEvent, form]);
 
+  useEffect(() => {
+    const eventId = searchParams.get('eventId');
+    if (!eventId || events.length === 0) {
+      return;
+    }
+
+    const targetEvent = events.find((event) => event.id === eventId);
+    if (!targetEvent) {
+      return;
+    }
+
+    setCurrentDate(targetEvent.date);
+    setViewingEvent(targetEvent);
+    setSelectedDay(null);
+  }, [events, searchParams]);
+
   function onEditSubmit(data: EventFormValues) {
     if (editingEvent) {
       updateEvent(editingEvent.id, data);
@@ -116,6 +149,69 @@ export default function CalendarPage() {
   const endDate = endOfWeek(endOfMonthVar, { locale: es });
 
   const monthDays = eachDayOfInterval({ start: startDate, end: endDate });
+  const hasActiveFilters =
+    searchTitle.length > 0 ||
+    keyword.length > 0 ||
+    dateFrom !== null ||
+    dateTo !== null ||
+    categoryFilter !== null;
+
+  const filteredEvents = useMemo(() => {
+    return events.filter((event) => {
+      if (searchTitle && !event.title.toLowerCase().includes(searchTitle.toLowerCase())) {
+        return false;
+      }
+
+      if (keyword) {
+        const normalizedKeywordTerms = normalizeSearchValue(keyword)
+          .split(/\s+/)
+          .filter(Boolean);
+        const searchableContent = normalizeSearchValue(
+          [event.title, event.description || '', typeMap[event.type].label].join(' ')
+        );
+
+        const matchesKeyword = normalizedKeywordTerms.every((term) =>
+          searchableContent.includes(term)
+        );
+
+        if (!matchesKeyword) {
+          return false;
+        }
+      }
+
+      if (dateFrom) {
+        const from = new Date(dateFrom + 'T00:00:00');
+        if (event.date < from) {
+          return false;
+        }
+      }
+
+      if (dateTo) {
+        const to = new Date(dateTo + 'T23:59:59');
+        if (event.date > to) {
+          return false;
+        }
+      }
+
+      if (categoryFilter && event.type !== categoryFilter) {
+        return false;
+      }
+
+      return true;
+    }).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [events, searchTitle, keyword, dateFrom, dateTo, categoryFilter]);
+
+  const filteredEventsInCurrentMonth = useMemo(() => {
+    return filteredEvents.filter((event) => isSameMonth(event.date, currentDate));
+  }, [filteredEvents, currentDate]);
+
+  const searchSuggestions = useMemo(() => {
+    if (!searchTitle.trim()) {
+      return [];
+    }
+
+    return filteredEvents.slice(0, 6);
+  }, [filteredEvents, searchTitle]);
 
   const nextMonth = () => {
     setCurrentDate(addMonths(currentDate, 1));
@@ -128,7 +224,7 @@ export default function CalendarPage() {
   const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   const getEventsForDay = (day: Date): EventWithId[] => {
-    return events.filter((event) => isSameDay(event.date, day));
+    return filteredEvents.filter((event) => isSameDay(event.date, day));
   };
 
   const handleEventClick = (event: EventWithId) => {
@@ -151,6 +247,13 @@ export default function CalendarPage() {
       });
       setViewingEvent(null);
     }
+  };
+
+  const focusEvent = (event: EventWithId) => {
+    setCurrentDate(event.date);
+    setSelectedDay(null);
+    setViewingEvent(event);
+    setIsSearchFocused(false);
   };
 
   return (
@@ -178,6 +281,138 @@ export default function CalendarPage() {
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 mb-6">
+          <div className="relative">
+            <Label htmlFor="calendar-search">Buscar</Label>
+            <Input
+              id="calendar-search"
+              value={searchTitle}
+              onChange={(event) => setSearchTitle(event.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => {
+                window.setTimeout(() => setIsSearchFocused(false), 120);
+              }}
+              placeholder="Buscar por título"
+            />
+            {isSearchFocused && searchTitle.trim().length > 0 && (
+              <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border bg-popover shadow-lg">
+                {searchSuggestions.length > 0 ? (
+                  <div className="max-h-72 overflow-auto py-1">
+                    {searchSuggestions.map((event) => (
+                      <button
+                        key={event.id}
+                        type="button"
+                        className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-muted/60"
+                        onMouseDown={(mouseEvent) => {
+                          mouseEvent.preventDefault();
+                          focusEvent(event);
+                        }}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{event.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(event.date, 'PPP', { locale: es })}
+                            {formatTimeRange(event) ? ` · ${formatTimeRange(event)}` : ''}
+                          </p>
+                        </div>
+                        <Badge variant={event.type === 'tarea' ? 'destructive' : 'secondary'}>
+                          {typeMap[event.type].label}
+                        </Badge>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-3 py-3 text-sm text-muted-foreground">
+                    No hay coincidencias para esa búsqueda.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="calendar-keyword">Palabra clave</Label>
+            <Input
+              id="calendar-keyword"
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder="Buscar en descripción"
+            />
+          </div>
+          <div>
+            <Label htmlFor="calendar-date-from">Desde</Label>
+            <Input
+              id="calendar-date-from"
+              type="date"
+              value={dateFrom ?? ''}
+              onChange={(event) => setDateFrom(event.target.value || null)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="calendar-date-to">Hasta</Label>
+            <Input
+              id="calendar-date-to"
+              type="date"
+              value={dateTo ?? ''}
+              onChange={(event) => setDateTo(event.target.value || null)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="calendar-category">Categoría (opcional)</Label>
+            <Select
+              value={categoryFilter ?? 'all'}
+              onValueChange={(value) => setCategoryFilter(value === 'all' ? null : value)}
+            >
+              <SelectTrigger id="calendar-category">
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="evento">Evento</SelectItem>
+                <SelectItem value="tarea">Tarea</SelectItem>
+                <SelectItem value="recordatorio">Recordatorio</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-2">
+            {filteredEvents.length > 0 && hasActiveFilters && (
+              <Button
+                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                onClick={() => focusEvent(filteredEvents[0])}
+              >
+                Buscar
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSearchTitle('');
+                setKeyword('');
+                setDateFrom(null);
+                setDateTo(null);
+                setCategoryFilter(null);
+              }}
+            >
+              Limpiar filtros
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-muted-foreground">
+          <span>
+            {hasActiveFilters
+              ? `${filteredEvents.length} resultado${filteredEvents.length === 1 ? '' : 's'} encontrados`
+              : `${events.length} elemento${events.length === 1 ? '' : 's'} registrados`}
+          </span>
+          {hasActiveFilters && (
+            <span>
+              {filteredEventsInCurrentMonth.length} en {format(currentDate, 'MMMM yyyy', { locale: es })}
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-7 text-center text-sm font-medium text-muted-foreground pb-2 border-b">

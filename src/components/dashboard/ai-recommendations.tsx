@@ -9,6 +9,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { parseLocalDate } from '@/lib/date';
 import {
   Dialog,
   DialogContent,
@@ -114,11 +115,8 @@ export function AiRecommendations() {
   const handleConfirm = () => {
     if (!extractedEvent) return;
 
-    const parsedDate = new Date(formValues.fecha);
-    const date =
-      formValues.fecha && !Number.isNaN(parsedDate.getTime())
-        ? parsedDate
-        : new Date();
+    const parsedDate = parseLocalDate(formValues.fecha);
+    const date = parsedDate ?? new Date();
 
     const descriptionParts = [];
     if (formValues.descripcion.trim()) {
