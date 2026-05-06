@@ -1,16 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  useEvents,
-  type EventFormValues,
-  type EventWithId,
-} from "@/context/events-context";
+import { useTasks, type TaskWithId } from "@/context/tasks-context";
 import { useForm } from "react-hook-form";
+import type { EventFormValues } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eventFormSchema } from "@/lib/types";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { parseLocalDate } from '@/lib/date';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -105,10 +103,10 @@ const statusMap: Record<
   },
 };
 
-type Task = EventWithId & { type: "tarea" };
+type Task = TaskWithId & { type: "tarea" };
 
 export default function TasksPage() {
-  const { events, addEvent, updateEvent, deleteEvent } = useEvents();
+  const { tasks: allTasks, addTask, updateTask, deleteTask } = useTasks();
   const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -122,8 +120,8 @@ export default function TasksPage() {
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
 
   const tasks = useMemo(
-    () => events.filter((event): event is Task => event.type === "tarea"),
-    [events],
+    () => allTasks.filter((task): task is Task => task.type === "tarea"),
+    [allTasks],
   );
 
   const filteredTasks = useMemo(() => {
@@ -148,7 +146,7 @@ export default function TasksPage() {
       )
       .filter((task) => {
         // date range (optional) based on task.date
-        const taskDate = task.date instanceof Date ? task.date : new Date(task.date);
+        const taskDate = task.date instanceof Date ? task.date : parseLocalDate(task.date) ?? new Date(task.date);
         if (dateFrom) {
           const from = new Date(dateFrom + "T00:00:00");
           if (taskDate < from) return false;
@@ -160,7 +158,11 @@ export default function TasksPage() {
         return true;
       })
       // order by date descending (más recientes primero)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => {
+        const aDate = a.date instanceof Date ? a.date : parseLocalDate(a.date) ?? new Date(a.date);
+        const bDate = b.date instanceof Date ? b.date : parseLocalDate(b.date) ?? new Date(b.date);
+        return bDate.getTime() - aDate.getTime();
+      });
   }, [tasks, searchTerm, keyword, dateFrom, dateTo, categoryFilter, priorityFilter]);
 
   const addForm = useForm<EventFormValues>({
@@ -190,7 +192,7 @@ export default function TasksPage() {
     }
   }, [editingTask, editForm]);
 
-  const handleAddTask = (data: EventFormValues) => {
+  const handleAddTask = async (data: EventFormValues) => {
     const newTaskData = {
       ...data,
       type: "tarea" as const,
@@ -202,7 +204,7 @@ export default function TasksPage() {
           }),
     };
 
-    addEvent(newTaskData);
+    await addTask(newTaskData);
     toast({
       title: "¡Tarea Creada!",
       description: `Se ha creado la tarea "${data.title}".`,
@@ -219,7 +221,7 @@ export default function TasksPage() {
     setIsAddDialogOpen(false);
   };
 
-  const handleUpdateTask = (data: EventFormValues) => {
+  const handleUpdateTask = async (data: EventFormValues) => {
     if (editingTask) {
       const updatedData = {
         ...data,
@@ -232,7 +234,7 @@ export default function TasksPage() {
             }),
       };
 
-      updateEvent(editingTask.id, updatedData);
+      await updateTask(editingTask.id, updatedData);
       toast({
         title: "¡Tarea Actualizada!",
         description: `Se ha actualizado la tarea "${data.title}".`,
@@ -241,19 +243,19 @@ export default function TasksPage() {
     }
   };
 
-  const handleDeleteTask = (taskId: string, taskTitle: string) => {
-    deleteEvent(taskId);
+  const handleDeleteTask = async (taskId: string, taskTitle: string) => {
+    await deleteTask(taskId);
     toast({
       title: "¡Tarea Eliminada!",
       description: `Se ha eliminado la tarea "${taskTitle}".`,
     });
   };
 
-  const handleStatusChange = (
+  const handleStatusChange = async (
     task: Task,
     status: "not-started" | "in-progress" | "completed",
   ) => {
-    updateEvent(task.id, { ...task, status });
+    await updateTask(task.id, { ...task, status });
     toast({
       title: "¡Estado Actualizado!",
       description: `El estado de la tarea "${task.title}" ha sido actualizado.`,
