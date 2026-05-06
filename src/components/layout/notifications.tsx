@@ -44,18 +44,24 @@ export function Notifications() {
 
   useEffect(() => {
     load();
-    const t = setInterval(() => load(), 30000);
+    let t: NodeJS.Timeout | undefined;
+
     const onNotificationsChanged = () => {
       void load();
     };
 
     window.addEventListener('notifications:changed', onNotificationsChanged);
 
+    // Solo hacer polling cuando el dropdown está abierto
+    if (open) {
+      t = setInterval(() => load(), 30000);
+    }
+
     return () => {
-      clearInterval(t);
+      if (t) clearInterval(t);
       window.removeEventListener('notifications:changed', onNotificationsChanged);
     };
-  }, []);
+  }, [open]);
 
   async function markAllRead() {
     await fetch('/api/notifications', {

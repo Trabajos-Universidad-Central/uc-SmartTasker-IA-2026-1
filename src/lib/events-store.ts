@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { EventFormValues } from '@/lib/types';
+import { parseLocalDate } from '@/lib/date';
 
 export type StoredEvent = EventFormValues & { id: string };
 
@@ -28,7 +29,11 @@ async function writeAll(events: StoredEvent[]) {
 
 export async function getEvents() {
   const events = await readAll();
-  return events.sort((a, b) => +new Date(a.date) - +new Date(b.date));
+  return events.sort((a, b) => {
+    const aTime = parseLocalDate(a.date)?.getTime() ?? 0;
+    const bTime = parseLocalDate(b.date)?.getTime() ?? 0;
+    return aTime - bTime;
+  });
 }
 
 export async function createEvent(event: StoredEvent) {
