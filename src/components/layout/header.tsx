@@ -16,6 +16,7 @@ import {
 import data from '@/lib/placeholder-images.json';
 import { useAuth } from '@/hooks/use-auth';
 import { createClient } from '@/lib/supabase/client';
+import { MobileSidebarTrigger } from '@/components/layout/sidebar';
 
 export function AppHeader() {
   const userAvatar = data.placeholderImages.find((p) => p.id === 'user-avatar');
