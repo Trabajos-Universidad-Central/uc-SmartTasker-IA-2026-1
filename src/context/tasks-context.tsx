@@ -4,6 +4,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import type { EventFormValues } from '@/lib/types';
 import { createUserNotification } from '@/lib/notifications-client';
 import { parseLocalDate } from '@/lib/date';
+import { useAuth } from '@/hooks/use-auth';
 
 export type TaskWithId = EventFormValues & { id: string };
 
@@ -28,9 +29,16 @@ export function useTasks() {
 export function TasksProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<TaskWithId[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function loadTasks() {
+      if (!user) {
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch('/api/tasks', { cache: 'no-store' });
         
@@ -61,7 +69,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     }
 
     void loadTasks();
-  }, []);
+  }, [user]);
 
   const addTask = async (task: EventFormValues) => {
     const newTask: TaskWithId = { ...task, id: crypto.randomUUID() };
