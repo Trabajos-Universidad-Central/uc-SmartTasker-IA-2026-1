@@ -1,5 +1,7 @@
 export function isYYYYMMDD(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value.trim());
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return false;
+  const [, month, day] = value.trim().split('-').map(Number);
+  return month >= 1 && month <= 12 && day >= 1 && day <= 31;
 }
 
 export function parseLocalDate(date: Date | string | undefined | null): Date | null {
