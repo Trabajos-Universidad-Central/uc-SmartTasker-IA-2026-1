@@ -4,6 +4,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import type { EventFormValues } from '@/lib/types';
 import { createUserNotification } from '@/lib/notifications-client';
 import { parseLocalDate } from '@/lib/date';
+import { useAuth } from '@/hooks/use-auth';
 
 export type { EventFormValues } from '@/lib/types';
 
@@ -30,6 +31,7 @@ export function useEvents() {
 export function EventsProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<EventWithId[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   function parseEvent(event: Omit<EventWithId, 'date'> & { date: string } | EventWithId): EventWithId {
     if (event && typeof event.date === 'string') {
@@ -44,6 +46,12 @@ export function EventsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function loadEvents() {
+      if (!user) {
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch('/api/events', { cache: 'no-store' });
         
@@ -71,7 +79,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     }
 
     void loadEvents();
-  }, []);
+  }, [user]);
 
   const addEvent = async (event: EventFormValues) => {
     const newEvent: EventWithId = { ...event, id: crypto.randomUUID() };

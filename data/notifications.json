@@ -1,14 +1,422 @@
 [
   {
-    "id": "c67ceaba-0b45-4577-9181-146317990409",
+    "id": "f021586f-0118-42c3-8dba-8254c51cf30c",
     "user_id": "default-user",
-    "type": "tarea.updated",
-    "message": "Tarea 'practicas entrega final' actualizado",
+    "type": "evento.updated",
+    "message": "Evento 'prueba' actualizado",
     "metadata": {
-      "event_id": "bfafc316-f5f3-4947-96ea-e878c45b9005",
+      "event_id": "451b3aaf-1ae7-4846-a23a-aa32cad5d563",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-03T18:53:45.927Z"
+  },
+  {
+    "id": "dee96765-8afb-4f8d-a91a-078f34eb6939",
+    "user_id": "default-user",
+    "type": "evento.updated",
+    "message": "Evento 'prueba' actualizado",
+    "metadata": {
+      "event_id": "451b3aaf-1ae7-4846-a23a-aa32cad5d563",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-03T18:53:46.208Z"
+  },
+  {
+    "id": "c9e41960-a14d-49fc-9568-9e3983c4239b",
+    "user_id": "default-user",
+    "type": "recordatorio.created",
+    "message": "Recordatorio 'prueba 2' creado correctamente",
+    "metadata": {
+      "event_id": "55c96721-746a-43ce-b3e4-3466e58db91c",
+      "entity": "recordatorio"
+    },
+    "is_read": true,
+    "created_at": "2026-05-03T18:54:17.421Z"
+  },
+  {
+    "id": "3266a23b-6f47-4e95-8a29-8d86e259a734",
+    "user_id": "default-user",
+    "type": "evento.created",
+    "message": "Evento 'prueba' creado correctamente",
+    "metadata": {
+      "event_id": "55814330-cd03-4ce2-a43e-92fddb8beca6",
+      "entity": "evento"
+    },
+    "is_read": false,
+    "created_at": "2026-05-04T04:15:35.494Z"
+  },
+  {
+    "id": "40817144-a094-4ec2-bd10-1845136ba432",
+    "user_id": "default-user",
+    "type": "evento.created",
+    "message": "Evento '222' creado correctamente",
+    "metadata": {
+      "event_id": "4127654e-18a8-48ad-ace1-3053e42331be",
+      "entity": "evento"
+    },
+    "is_read": false,
+    "created_at": "2026-05-04T05:02:52.060Z"
+  },
+  {
+    "id": "deb3ce72-2a74-455d-aec6-726dc9d552d4",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento '1234' creado correctamente",
+    "metadata": {
+      "event_id": "0362bac0-5035-47ac-95c6-85952cec02e5",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T05:34:41.115Z"
+  },
+  {
+    "id": "3fe65f0b-1bec-4202-892e-cf7d697eca37",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'prueba 2' creado correctamente",
+    "metadata": {
+      "event_id": "5285d646-4c93-44f4-8ae4-5c59c1e24a88",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T05:39:12.908Z"
+  },
+  {
+    "id": "32857365-56f4-47e9-9ca6-ac9aa186a0d7",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'prueba 3' creado correctamente",
+    "metadata": {
+      "event_id": "fdbfc254-f3f9-4742-891f-1bebfacbfdff",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T05:40:49.383Z"
+  },
+  {
+    "id": "e38497c7-6f5e-4c6c-942e-8fcd29e17052",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.created",
+    "message": "Tarea 'presentacion' creado correctamente",
+    "metadata": {
+      "event_id": "45d7ad45-62f3-4f3f-aaed-af00b058a36a",
       "entity": "tarea"
     },
     "is_read": true,
-    "created_at": "2026-05-02T21:15:55.346Z"
+    "created_at": "2026-05-04T05:47:11.775Z"
+  },
+  {
+    "id": "bbf9fc54-aa24-4410-a29b-c718834b0018",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.created",
+    "message": "Tarea 'r15' creado correctamente",
+    "metadata": {
+      "event_id": "29a2ba2b-1b88-41c7-9799-65faebbc90b0",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:04:04.716Z"
+  },
+  {
+    "id": "3ec2974a-2d33-4db9-ae88-9522a7976969",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'Cumpleaños de Angel' creado correctamente",
+    "metadata": {
+      "event_id": "b7a7ab32-a16c-44d0-ad30-210f8c410fc5",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:06:17.075Z"
+  },
+  {
+    "id": "00d41ad3-afd4-4356-aa9f-f2e54fcc5a74",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'r15' actualizado",
+    "metadata": {
+      "event_id": "29a2ba2b-1b88-41c7-9799-65faebbc90b0",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:07:03.938Z"
+  },
+  {
+    "id": "6aacbaaf-6065-40b7-858d-b218e85416f1",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.created",
+    "message": "Tarea 'ajuste' creado correctamente",
+    "metadata": {
+      "event_id": "6bd2514a-3671-4aba-aee4-1c94f2edc7c0",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:07:56.540Z"
+  },
+  {
+    "id": "2504544c-64a1-4fad-b264-84f8a4df0a2a",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.created",
+    "message": "Tarea 'prueba F' creado correctamente",
+    "metadata": {
+      "event_id": "6d663d0d-80ef-4b4e-ab25-75bdf3ab7c43",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:12:52.744Z"
+  },
+  {
+    "id": "b8e81dee-77e3-4a5b-bc6c-449f23e6c5a5",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.created",
+    "message": "Tarea 'prueba F x2' creado correctamente",
+    "metadata": {
+      "event_id": "496818ab-a635-4078-b925-a68df044c5e0",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:13:47.892Z"
+  },
+  {
+    "id": "670a6323-57a8-41e3-a756-478d2dfa071f",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.created",
+    "message": "Tarea 'final' creado correctamente",
+    "metadata": {
+      "event_id": "9573dc5f-b44b-4745-9536-cf486c88e6cd",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-04T06:16:04.841Z"
+  },
+  {
+    "id": "c2ab1912-4af8-42e1-a7b7-6e6e96a15cba",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'exposicion' creado correctamente",
+    "metadata": {
+      "event_id": "9172ad0d-4dac-406b-a2af-40df6b1d988c",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-06T05:12:11.466Z"
+  },
+  {
+    "id": "204f092b-5380-4c7c-93bc-481a23f9d0f4",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.deleted",
+    "message": "Evento '1234' eliminado",
+    "metadata": {
+      "event_id": "0362bac0-5035-47ac-95c6-85952cec02e5",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-06T05:12:38.418Z"
+  },
+  {
+    "id": "64627872-7248-4a3f-ad5d-410ab89ea083",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "recordatorio.created",
+    "message": "Recordatorio 'calculo' creado correctamente",
+    "metadata": {
+      "event_id": "bb79b712-7ba4-4320-a09b-e1a555b8ab09",
+      "entity": "recordatorio"
+    },
+    "is_read": true,
+    "created_at": "2026-05-06T05:13:13.437Z"
+  },
+  {
+    "id": "67669352-6a68-4311-adc0-d009c183fe3c",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'Festejemos mi Cumpleaños' creado correctamente",
+    "metadata": {
+      "event_id": "2cb58c91-52d6-4281-ae8c-bd4e655fe918",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-06T05:17:20.406Z"
+  },
+  {
+    "id": "88fc6c74-3590-40ee-a014-be40d14c207b",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'arreglo' creado correctamente",
+    "metadata": {
+      "event_id": "09d139a4-2d93-4589-a3bc-b83964298d97",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-06T05:30:41.177Z"
+  },
+  {
+    "id": "3c1b571a-ad83-4011-9d21-82dcade52d12",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'tarea de data' creado correctamente",
+    "metadata": {
+      "event_id": "9910f3e0-8eb2-44b2-b418-fe0f7615786f",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-06T20:26:23.101Z"
+  },
+  {
+    "id": "d94adc6e-a2fb-4644-ba86-fb8ee22a77a5",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'ajuste' actualizado",
+    "metadata": {
+      "event_id": "6bd2514a-3671-4aba-aee4-1c94f2edc7c0",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-15T22:05:13.531Z"
+  },
+  {
+    "id": "dc7594bf-8050-4618-810c-415f03bab902",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'reunión' creado correctamente",
+    "metadata": {
+      "event_id": "e9f56f52-645b-427d-b74e-4d6fa528288b",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-15T22:07:41.329Z"
+  },
+  {
+    "id": "5d8ebf8e-c192-4649-9821-e8c4c7bf427b",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.created",
+    "message": "Evento 'ensayo' creado correctamente",
+    "metadata": {
+      "event_id": "deef8881-0855-4221-a629-d2d6672484da",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-15T22:09:14.216Z"
+  },
+  {
+    "id": "7f0d8d9e-a6cf-47a7-89f5-2f7b7b511198",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.updated",
+    "message": "Evento 'Cumpleaños amigo' actualizado",
+    "metadata": {
+      "event_id": "5c43609d-a5ca-429d-9a78-f64feeb29d10",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-15T22:11:19.035Z"
+  },
+  {
+    "id": "5e32528d-0cc0-457f-8989-3dff9d6eca5c",
+    "user_id": "8fc3c023-a2a9-4961-a038-dde083484ff0",
+    "type": "evento.created",
+    "message": "Evento 'Los 40 del Varcho' creado correctamente",
+    "metadata": {
+      "event_id": "7b319cb7-1792-4e6d-a279-411f74357453",
+      "entity": "evento"
+    },
+    "is_read": false,
+    "created_at": "2026-05-15T23:09:08.588Z"
+  },
+  {
+    "id": "5457a6a3-e0b1-40bf-a48d-115293b02e82",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.updated",
+    "message": "Evento 'Reunión trabajo' actualizado",
+    "metadata": {
+      "event_id": "2cb58c91-52d6-4281-ae8c-bd4e655fe918",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:12:52.899Z"
+  },
+  {
+    "id": "fd64041e-5c01-4b7b-bfa2-6c9fc41c08ab",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'Entrega final práctica IV' actualizado",
+    "metadata": {
+      "event_id": "9573dc5f-b44b-4745-9536-cf486c88e6cd",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:13:16.314Z"
+  },
+  {
+    "id": "3c47b519-f2e4-43e2-9c82-f96a3af71975",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'Lección Duolingo' actualizado",
+    "metadata": {
+      "event_id": "6d663d0d-80ef-4b4e-ab25-75bdf3ab7c43",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:14:02.637Z"
+  },
+  {
+    "id": "19afbec4-2c43-41a7-a080-b492f2861a6a",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'Demo funcional prototipo' actualizado",
+    "metadata": {
+      "event_id": "496818ab-a635-4078-b925-a68df044c5e0",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:14:28.412Z"
+  },
+  {
+    "id": "442f8b2f-8cf3-40c9-9011-ab1f5837963f",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.updated",
+    "message": "Evento 'cita medica' actualizado",
+    "metadata": {
+      "event_id": "fdbfc254-f3f9-4742-891f-1bebfacbfdff",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:22:44.783Z"
+  },
+  {
+    "id": "3a0ff102-323f-40d3-875d-228854e0fe5e",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "evento.updated",
+    "message": "Evento 'arreglo moto' actualizado",
+    "metadata": {
+      "event_id": "09d139a4-2d93-4589-a3bc-b83964298d97",
+      "entity": "evento"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:22:53.187Z"
+  },
+  {
+    "id": "010367cf-8bef-4fe4-9077-a282982ea6cc",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'Entrega final práctica IV' actualizado",
+    "metadata": {
+      "event_id": "9573dc5f-b44b-4745-9536-cf486c88e6cd",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:24:02.915Z"
+  },
+  {
+    "id": "facedb8b-2f02-42d1-bf2a-e1490460e3fd",
+    "user_id": "3927595e-cabf-4a39-b9ad-3f20faf04261",
+    "type": "tarea.updated",
+    "message": "Tarea 'Lección Duolingo' actualizado",
+    "metadata": {
+      "event_id": "6d663d0d-80ef-4b4e-ab25-75bdf3ab7c43",
+      "entity": "tarea"
+    },
+    "is_read": true,
+    "created_at": "2026-05-19T04:24:06.424Z"
   }
 ]

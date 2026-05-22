@@ -42,5 +42,38 @@
     "fullDay": true,
     "id": "99ce1978-ff44-4c31-8407-8dcacd82dff3",
     "status": "not-started"
+  },
+  {
+    "title": "prueba",
+    "type": "evento",
+    "date": "2026-05-04T05:00:00.000Z",
+    "fullDay": true,
+    "id": "451b3aaf-1ae7-4846-a23a-aa32cad5d563",
+    "description": "esto es para ver\n"
+  },
+  {
+    "title": "prueba 2",
+    "type": "recordatorio",
+    "date": "2026-05-03T05:00:00.000Z",
+    "fullDay": true,
+    "description": "sera que",
+    "id": "55c96721-746a-43ce-b3e4-3466e58db91c"
+  },
+  {
+    "title": "prueba",
+    "type": "evento",
+    "date": "2026-05-04T05:00:00.000Z",
+    "fullDay": false,
+    "horaInicio": "04:30",
+    "horaFin": "05:00",
+    "description": "123456",
+    "id": "55814330-cd03-4ce2-a43e-92fddb8beca6"
+  },
+  {
+    "title": "222",
+    "type": "evento",
+    "date": "2026-05-12T05:00:00.000Z",
+    "fullDay": true,
+    "id": "4127654e-18a8-48ad-ace1-3053e42331be"
   }
 ]
