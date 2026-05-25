@@ -8,7 +8,8 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { useEvents, type EventFormValues, type EventWithId } from '@/context/events-context';
+import { useTasks, type TaskWithId } from '@/context/tasks-context';
+import type { EventFormValues } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
@@ -29,10 +30,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { eventFormSchema } from '@/lib/types';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+// Label component removed — not needed after removing filters
 import { useToast } from '@/hooks/use-toast';
 
 const priorityMap = {
@@ -52,10 +54,10 @@ const priorityMap = {
   low: { label: 'Baja', variant: 'secondary' as const },
 };
 
-type Task = EventWithId & { type: 'tarea' };
+type Task = TaskWithId;
 
 export function PendingTasks() {
-  const { events, updateEvent, deleteEvent } = useEvents();
+  const { tasks, updateTask, deleteTask } = useTasks();
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const { toast } = useToast();
@@ -70,9 +72,9 @@ export function PendingTasks() {
     }
   }, [editingTask, form]);
 
-  function onEditSubmit(data: EventFormValues) {
+  async function onEditSubmit(data: EventFormValues) {
     if (editingTask) {
-      updateEvent(editingTask.id, data);
+      await updateTask(editingTask.id, data);
       toast({
         title: '¡Tarea Actualizada!',
         description: `Se ha actualizado "${data.title}".`,
@@ -81,9 +83,9 @@ export function PendingTasks() {
     }
   }
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = async () => {
     if (viewingTask) {
-      deleteEvent(viewingTask.id);
+      await deleteTask(viewingTask.id);
       toast({
         title: '¡Tarea Eliminada!',
         description: `Se ha eliminado la tarea "${viewingTask.title}".`,
@@ -100,16 +102,15 @@ export function PendingTasks() {
   };
 
   const pendingTasks = useMemo(
-    () =>
-      events.filter(
-        (event): event is Task =>
-          event.type === 'tarea' && event.status !== 'completed'
-      ),
-    [events]
+    () => tasks.filter((task) => task.status !== 'completed'),
+    [tasks]
   );
 
-  const handleTaskCompletion = (task: Task, completed: boolean) => {
-    updateEvent(task.id, {
+  // Without filters: show all pending tasks
+  const tasksToShow = pendingTasks;
+
+  const handleTaskCompletion = async (task: Task, completed: boolean) => {
+    await updateTask(task.id, {
       ...task,
       status: completed ? 'completed' : 'in-progress',
     });
@@ -126,50 +127,54 @@ export function PendingTasks() {
         </CardHeader>
         <CardContent>
           {pendingTasks.length > 0 ? (
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-4">
-                {pendingTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center p-3 rounded-lg border transition-colors hover:bg-muted/50"
-                  >
-                    <Checkbox
-                      id={`task-${task.id}`}
-                      className="mr-4"
-                      checked={task.status === 'completed'}
-                      onCheckedChange={(checked) => {
-                        handleTaskCompletion(task, !!checked);
-                      }}
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={`task-${task.id}`}
-                        className="font-medium cursor-pointer"
+            <div>
+              <ScrollArea className="h-[300px] pr-4">
+                <div className="space-y-4">
+                  {tasksToShow.map((task) => {
+                    return (
+                      <div
+                        key={task.id}
+                        className="flex items-center p-3 rounded-lg border transition-colors hover:bg-muted/50"
                       >
-                        {task.title}
-                      </label>
-                      <p className="text-sm text-muted-foreground">
-                        Vence: {format(task.date, 'PPP', { locale: es })}
-                      </p>
-                    </div>
-                    {task.priority && (
-                      <Badge variant={priorityMap[task.priority].variant}>
-                        {priorityMap[task.priority].label}
-                      </Badge>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 ml-2"
-                      onClick={() => setViewingTask(task)}
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span className="sr-only">Ver detalles</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
+                        <Checkbox
+                          id={`task-${task.id}`}
+                          className="mr-4"
+                          checked={task.status === 'completed'}
+                          onCheckedChange={(checked) => {
+                            handleTaskCompletion(task, !!checked);
+                          }}
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor={`task-${task.id}`}
+                            className="font-medium cursor-pointer"
+                          >
+                            {task.title}
+                          </label>
+                          <p className="text-sm text-muted-foreground">
+                            Vence: {format(task.date, 'PPP', { locale: es })}
+                          </p>
+                        </div>
+                        {task.priority && (
+                          <Badge variant={priorityMap[task.priority].variant}>
+                            {priorityMap[task.priority].label}
+                          </Badge>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 ml-2"
+                          onClick={() => setViewingTask(task)}
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span className="sr-only">Ver detalles</span>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
           ) : (
             <div className="h-[300px] flex items-center justify-center">
               <p className="text-sm text-muted-foreground text-center">

@@ -1,0 +1,79 @@
+[
+  {
+    "title": "practica",
+    "type": "tarea",
+    "date": "2026-05-05T05:00:00.000Z",
+    "priority": "medium",
+    "status": "not-started",
+    "fullDay": true,
+    "id": "46b52b5b-5629-4f02-a708-ea573c9c7828"
+  },
+  {
+    "title": "practicas entrega final",
+    "type": "tarea",
+    "date": "2026-05-27T05:00:00.000Z",
+    "priority": "medium",
+    "status": "completed",
+    "fullDay": true,
+    "id": "bfafc316-f5f3-4947-96ea-e878c45b9005"
+  },
+  {
+    "title": "preubas",
+    "type": "recordatorio",
+    "date": "2026-04-24T05:00:00.000Z",
+    "fullDay": true,
+    "description": "asda",
+    "id": "6f9d4544-a07e-4292-876c-3dbd932db6fd"
+  },
+  {
+    "title": "Cumpleaños de Jean",
+    "type": "evento",
+    "date": "2026-04-27T00:00:00.000Z",
+    "priority": "medium",
+    "fullDay": false,
+    "horaInicio": "20:00",
+    "description": "Invitación al cumpleaños de Jean. Se celebrará en el Salón de Fiestas \"El Globo Feliz\", ubicado en Calle 10 y Av. Central, Bogotá. Habrá pastel. Favor de confirmar asistencia al 300 123 4567. Hora: 20:00",
+    "id": "bb13e0a6-fff1-445b-8c17-22e1ba8f5a17"
+  },
+  {
+    "title": "prueba",
+    "type": "tarea",
+    "date": "2026-05-02T05:00:00.000Z",
+    "fullDay": true,
+    "id": "99ce1978-ff44-4c31-8407-8dcacd82dff3",
+    "status": "not-started"
+  },
+  {
+    "title": "prueba",
+    "type": "evento",
+    "date": "2026-05-04T05:00:00.000Z",
+    "fullDay": true,
+    "id": "451b3aaf-1ae7-4846-a23a-aa32cad5d563",
+    "description": "esto es para ver\n"
+  },
+  {
+    "title": "prueba 2",
+    "type": "recordatorio",
+    "date": "2026-05-03T05:00:00.000Z",
+    "fullDay": true,
+    "description": "sera que",
+    "id": "55c96721-746a-43ce-b3e4-3466e58db91c"
+  },
+  {
+    "title": "prueba",
+    "type": "evento",
+    "date": "2026-05-04T05:00:00.000Z",
+    "fullDay": false,
+    "horaInicio": "04:30",
+    "horaFin": "05:00",
+    "description": "123456",
+    "id": "55814330-cd03-4ce2-a43e-92fddb8beca6"
+  },
+  {
+    "title": "222",
+    "type": "evento",
+    "date": "2026-05-12T05:00:00.000Z",
+    "fullDay": true,
+    "id": "4127654e-18a8-48ad-ace1-3053e42331be"
+  }
+]

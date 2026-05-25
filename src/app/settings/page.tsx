@@ -1,8 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useAuth } from '@/hooks/use-auth';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -22,7 +27,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { User, Lock } from 'lucide-react';
+import { User, Lock, Loader2 } from 'lucide-react';
 
 const passwordFormSchema = z
   .object({
@@ -41,6 +46,12 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const memberSince = user?.created_at
+    ? format(new Date(user.created_at), "d 'de' MMMM, yyyy", { locale: es })
+    : '';
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -51,8 +62,47 @@ export default function SettingsPage() {
     },
   });
 
-  const onPasswordSubmit = (data: PasswordFormValues) => {
-    console.log(data);
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
+    if (!user?.email) {
+      toast({
+        variant: 'destructive',
+        title: 'Sesión no válida',
+        description: 'No se pudo identificar tu cuenta. Vuelve a iniciar sesión.',
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    const supabase = createClient();
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: data.currentPassword,
+    });
+
+    if (signInError) {
+      setIsUpdating(false);
+      passwordForm.setError('currentPassword', {
+        message: 'La contraseña actual es incorrecta.',
+      });
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: data.newPassword,
+    });
+
+    setIsUpdating(false);
+
+    if (updateError) {
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo actualizar la contraseña',
+        description: updateError.message,
+      });
+      return;
+    }
+
     toast({
       title: '¡Contraseña actualizada!',
       description: 'Tu contraseña ha sido cambiada exitosamente.',
@@ -83,11 +133,11 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" value="estudiante@example.com" readOnly />
+            <Input id="email" value={user?.email ?? ''} readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="memberSince">Miembro desde</Label>
-            <Input id="memberSince" value="14 de Mayo, 2024" readOnly />
+            <Input id="memberSince" value={memberSince} readOnly />
           </div>
         </CardContent>
       </Card>
@@ -116,7 +166,7 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>Contraseña Actual</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" disabled={isUpdating} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -129,7 +179,7 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>Nueva Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" disabled={isUpdating} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,13 +192,22 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>Confirmar Nueva Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" disabled={isUpdating} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Actualizar Contraseña</Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Actualizando...
+                  </>
+                ) : (
+                  'Actualizar Contraseña'
+                )}
+              </Button>
             </form>
           </Form>
         </CardContent>
